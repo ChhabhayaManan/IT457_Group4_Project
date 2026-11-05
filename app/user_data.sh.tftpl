@@ -1,0 +1,50 @@
+#!/bin/bash
+# EC2 user data for the mini-Hotstar app servers (Amazon Linux 2023).
+# Rendered by Terraform (infra/modules/compute) with:
+#   app_files : map of file name -> base64 content (app/*.py, requirements.txt)
+#   app_env   : map of environment variables for the service
+set -euxo pipefail
+exec > >(tee -a /var/log/hotstar-boot.log) 2>&1
+echo "BOOT_START $(date +%s)"
+
+# Bring the OS fully up to date first.
+dnf -y update
+dnf -y install python3.12 python3.12-pip
+
+# App code, written by Terraform into this script.
+useradd --system --home /opt/app --shell /sbin/nologin hotstar || true
+mkdir -p /opt/app
+%{ for name, content in app_files ~}
+echo '${content}' | base64 -d > /opt/app/${name}
+%{ endfor ~}
+
+cat > /etc/hotstar.env <<'ENV'
+%{ for key, value in app_env ~}
+${key}=${value}
+%{ endfor ~}
+ENV
+
+python3.12 -m venv /opt/app/venv
+/opt/app/venv/bin/pip install -r /opt/app/requirements.txt
+chown -R hotstar:hotstar /opt/app
+
+cat > /etc/systemd/system/hotstar.service <<'UNIT'
+[Unit]
+Description=mini-Hotstar API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=hotstar
+WorkingDirectory=/opt/app
+EnvironmentFile=/etc/hotstar.env
+ExecStart=/opt/app/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000 --workers 2
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+systemctl daemon-reload
+systemctl enable --now hotstar.service
+echo "BOOT_DONE $(date +%s)"
