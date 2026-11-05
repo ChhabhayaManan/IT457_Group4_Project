@@ -1,0 +1,7 @@
+# LF line endings everywhere, even on Windows with core.autocrlf=true:
+# scripts that run on Linux (EC2 user data, k6 box) break with CRLF, and
+# identical bytes on every laptop keep the handoff packages' checks simple.
+* text=auto eol=lf
+
+*.png binary
+*.gz  binary
