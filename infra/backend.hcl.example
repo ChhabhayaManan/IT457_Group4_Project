@@ -1,0 +1,5 @@
+# Copy to backend.hcl (gitignored) and set the bucket printed by infra/bootstrap.
+# Then: terraform -chdir=infra init -backend-config=backend.hcl
+bucket = "group4-hotstar-tfstate-<account-id>"
+key    = "main/terraform.tfstate"
+region = "ap-south-1"
