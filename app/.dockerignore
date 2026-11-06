@@ -1,0 +1,11 @@
+tests/
+scripts/
+__pycache__/
+.pytest_cache/
+.venv/
+venv/
+user_data.sh.tftpl
+Dockerfile
+README.md
+requirements-dev.txt
+pytest.ini
