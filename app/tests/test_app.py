@@ -25,6 +25,11 @@ def test_score_shape():
     assert set(body) >= {"match", "score", "overs", "updated"}
 
 
+def test_score_cache_header():
+    response = client.get("/score")
+    assert response.headers["cache-control"] == "public, max-age=5"
+
+
 def test_health_ok():
     response = client.get("/health")
     assert response.status_code == 200

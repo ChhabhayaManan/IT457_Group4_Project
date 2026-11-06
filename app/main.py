@@ -9,7 +9,7 @@ import hmac
 import os
 import time
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from pydantic import BaseModel
 
 PLAY_SECRET = os.environ.get("PLAY_SECRET", "group4-demo-secret")
@@ -32,8 +32,10 @@ def root():
 
 
 @app.get("/score")
-def score():
+def score(response: Response):
     # Light, identical for every viewer: the kind of response a CDN can cache.
+    # Hotstar served scorecards from the CDN; 5 s keeps the score fresh enough.
+    response.headers["Cache-Control"] = "public, max-age=5"
     return {
         "match": "IND vs AUS",
         "score": "287/4",
