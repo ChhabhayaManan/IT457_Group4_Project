@@ -16,6 +16,11 @@ variable "vpc_cidr" {
   default     = "10.40.0.0/16"
 }
 
+variable "budget_email" {
+  description = "Email that receives the $20 and $50 budget alerts. Set it in terraform.tfvars."
+  type        = string
+}
+
 variable "instance_type" {
   description = "App server type. Keep the same for every run so results compare. c7i-flex.large is allowed on the AWS Free plan."
   type        = string

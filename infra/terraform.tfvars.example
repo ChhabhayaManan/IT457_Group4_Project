@@ -1,0 +1,3 @@
+# Copy to terraform.tfvars (gitignored) and fill in. Experiment settings live in
+# infra/experiments/*.tfvars and are passed with -var-file.
+budget_email = "you@example.com"
