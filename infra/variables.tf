@@ -15,3 +15,26 @@ variable "vpc_cidr" {
   type        = string
   default     = "10.40.0.0/16"
 }
+
+variable "instance_type" {
+  description = "App server type. Keep the same for every run so results compare. c7i-flex.large is allowed on the AWS Free plan."
+  type        = string
+  default     = "c7i-flex.large"
+}
+
+variable "fixed_size" {
+  description = "Instance count when the group has a fixed size (E1: 1, 2, 4, 8)."
+  type        = number
+  default     = 1
+
+  validation {
+    condition     = var.fixed_size >= 1 && var.fixed_size <= 10
+    error_message = "fixed_size must be between 1 and 10."
+  }
+}
+
+variable "play_iterations" {
+  description = "PBKDF2 rounds per /play call: the CPU cost of one playback request."
+  type        = number
+  default     = 20000
+}
