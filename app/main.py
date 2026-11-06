@@ -9,8 +9,10 @@ import hmac
 import os
 import time
 
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, HTTPException, Request, Response
 from pydantic import BaseModel
+
+from instance import get_instance_id
 
 PLAY_SECRET = os.environ.get("PLAY_SECRET", "group4-demo-secret")
 # PBKDF2 rounds per /play call: the CPU cost of "DRM signing". About 20 ms on t3.micro.
@@ -18,7 +20,16 @@ PLAY_ITERATIONS = int(os.environ.get("PLAY_ITERATIONS", "20000"))
 # Rounds per /home call: a medium CPU cost for "personalisation".
 HOME_ITERATIONS = int(os.environ.get("HOME_ITERATIONS", "5000"))
 
+INSTANCE_ID = get_instance_id()
+
 app = FastAPI(title="mini-Hotstar")
+
+
+@app.middleware("http")
+async def add_instance_header(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Instance-Id"] = INSTANCE_ID
+    return response
 
 
 class PlayRequest(BaseModel):
@@ -28,7 +39,7 @@ class PlayRequest(BaseModel):
 
 @app.get("/")
 def root():
-    return {"status": "Match live, stream available"}
+    return {"status": "Match live, stream available", "instance": INSTANCE_ID}
 
 
 @app.get("/score")
@@ -41,6 +52,7 @@ def score(response: Response):
         "score": "287/4",
         "overs": "45.2",
         "updated": int(time.time()),
+        "instance": INSTANCE_ID,
     }
 
 
@@ -58,6 +70,7 @@ def play(request: PlayRequest):
     return {
         "playback_url": f"https://cdn.example.com/live/master.m3u8?exp={expires}&sig={signature[:32]}",
         "expires": expires,
+        "instance": INSTANCE_ID,
     }
 
 
@@ -68,6 +81,7 @@ def home():
     return {
         "rails": ["Live now", "Because you watched IND vs PAK", "Highlights", "Top picks for you"],
         "personalised": True,
+        "instance": INSTANCE_ID,
     }
 
 

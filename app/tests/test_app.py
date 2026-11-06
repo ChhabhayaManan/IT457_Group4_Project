@@ -1,9 +1,11 @@
 import hashlib
 import hmac
+import socket
 
 from fastapi.testclient import TestClient
 
-from main import PLAY_SECRET, app
+from instance import get_instance_id
+from main import INSTANCE_ID, PLAY_SECRET, app
 
 client = TestClient(app)
 
@@ -47,6 +49,32 @@ def test_play_valid_token():
 def test_play_bad_token_401():
     response = client.post("/play", json={"user_id": "u42", "token": "not-a-token"})
     assert response.status_code == 401
+
+
+def test_instance_header_everywhere():
+    paths = ["/", "/score", "/home", "/health"]
+    for path in paths:
+        assert client.get(path).headers["x-instance-id"] == INSTANCE_ID
+    play = client.post("/play", json={"user_id": "u1", "token": make_token("u1")})
+    assert play.headers["x-instance-id"] == INSTANCE_ID
+
+
+def test_bodies_include_instance():
+    for path in ["/", "/score", "/home"]:
+        assert client.get(path).json()["instance"] == INSTANCE_ID
+    play = client.post("/play", json={"user_id": "u1", "token": make_token("u1")})
+    assert play.json()["instance"] == INSTANCE_ID
+
+
+def test_instance_id_falls_back_to_hostname(monkeypatch):
+    monkeypatch.delenv("INSTANCE_ID", raising=False)
+    # Port 9 on localhost refuses at once, like a laptop with no EC2 metadata service.
+    assert get_instance_id(imds_url="http://127.0.0.1:9") == socket.gethostname()
+
+
+def test_instance_id_env_override(monkeypatch):
+    monkeypatch.setenv("INSTANCE_ID", "i-local-test")
+    assert get_instance_id() == "i-local-test"
 
 
 def test_home_personalised():
