@@ -67,8 +67,10 @@ terraform -chdir=infra destroy -var-file=experiments/e1-fixed-4.tfvars
 
 ## Before the experiments: vCPU quota
 
-E2 and E3 can grow to 10 app servers (2 vCPU each) plus the k6 box, so the account needs at
-least 22 On-Demand Standard vCPUs in `ap-south-1`. New accounts sometimes get less.
+Our account is on the AWS Free plan, which only allows a few instance types, so every server
+(app and k6 box) is a c7i-flex.large (2 vCPU). E2 and E3 can grow to 3 app servers plus the
+k6 box: 8 On-Demand Standard vCPUs in `ap-south-1`. The script also checks the type exists in
+our two zones.
 
 ```bash
 bash infra/scripts/check_quota.sh
