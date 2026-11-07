@@ -24,10 +24,12 @@ module "compute" {
   instance_type         = var.instance_type
   fixed_size            = var.fixed_size
   app_dir               = "${path.root}/../app"
+  panic_param_arn       = aws_ssm_parameter.panic_mode.arn
 
   app_env = {
     AWS_REGION      = var.aws_region
     PLAY_ITERATIONS = tostring(var.play_iterations)
+    PANIC_PARAM     = aws_ssm_parameter.panic_mode.name
   }
 }
 

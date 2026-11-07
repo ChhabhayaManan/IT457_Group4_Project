@@ -18,6 +18,21 @@ resource "aws_iam_role_policy_attachment" "ssm_core" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
+# Read the panic-mode flag, and nothing else in Parameter Store.
+resource "aws_iam_role_policy" "panic_flag" {
+  name = "read-panic-flag"
+  role = aws_iam_role.app.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["ssm:GetParameter"]
+      Resource = var.panic_param_arn
+    }]
+  })
+}
+
 resource "aws_iam_instance_profile" "app" {
   name = "${var.name}-app"
   role = aws_iam_role.app.name

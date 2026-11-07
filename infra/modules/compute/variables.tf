@@ -42,6 +42,11 @@ variable "app_env" {
   default     = {}
 }
 
+variable "panic_param_arn" {
+  description = "ARN of the panic-mode SSM parameter the app may read."
+  type        = string
+}
+
 variable "app_port" {
   type    = number
   default = 8000
