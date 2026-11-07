@@ -8,11 +8,13 @@ import hashlib
 import hmac
 import os
 import time
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request, Response
 from pydantic import BaseModel
 
 from instance import get_instance_id
+from panic import PanicFlag
 
 PLAY_SECRET = os.environ.get("PLAY_SECRET", "group4-demo-secret")
 # PBKDF2 rounds per /play call: the CPU cost of "DRM signing". About 20 ms on t3.micro.
@@ -21,8 +23,18 @@ PLAY_ITERATIONS = int(os.environ.get("PLAY_ITERATIONS", "20000"))
 HOME_ITERATIONS = int(os.environ.get("HOME_ITERATIONS", "5000"))
 
 INSTANCE_ID = get_instance_id()
+panic = PanicFlag.from_env()
 
-app = FastAPI(title="mini-Hotstar")
+STATIC_RAILS = ["Live now", "Highlights"]
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    panic.start()
+    yield
+
+
+app = FastAPI(title="mini-Hotstar", lifespan=lifespan)
 
 
 @app.middleware("http")
@@ -76,11 +88,16 @@ def play(request: PlayRequest):
 
 @app.get("/home")
 def home():
+    # Panic mode: skip personalisation so the CPU goes to /play.
+    if panic.is_on():
+        return {"rails": STATIC_RAILS, "personalised": False, "panic": True, "instance": INSTANCE_ID}
+
     # Medium CPU: pretend to rank rails for this viewer.
     hashlib.pbkdf2_hmac("sha256", b"home", PLAY_SECRET.encode(), HOME_ITERATIONS)
     return {
         "rails": ["Live now", "Because you watched IND vs PAK", "Highlights", "Top picks for you"],
         "personalised": True,
+        "panic": False,
         "instance": INSTANCE_ID,
     }
 

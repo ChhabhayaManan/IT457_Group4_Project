@@ -82,4 +82,19 @@ def test_home_personalised():
     assert response.status_code == 200
     body = response.json()
     assert body["personalised"] is True
+    assert body["panic"] is False
     assert len(body["rails"]) > 0
+
+
+def test_home_static_when_panic(monkeypatch):
+    monkeypatch.setenv("PANIC_MODE", "on")
+    body = client.get("/home").json()
+    assert body["personalised"] is False
+    assert body["panic"] is True
+    assert len(body["rails"]) > 0
+
+
+def test_play_still_works_in_panic(monkeypatch):
+    monkeypatch.setenv("PANIC_MODE", "on")
+    response = client.post("/play", json={"user_id": "u7", "token": make_token("u7")})
+    assert response.status_code == 200
