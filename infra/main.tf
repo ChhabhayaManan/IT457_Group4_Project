@@ -31,6 +31,14 @@ module "compute" {
   }
 }
 
+module "cdn" {
+  source = "./modules/cdn"
+  count  = var.enable_cdn ? 1 : 0
+
+  name         = var.project_name
+  alb_dns_name = module.alb.alb_dns_name
+}
+
 module "loadgen" {
   source = "./modules/loadgen"
   count  = var.enable_loadgen ? 1 : 0

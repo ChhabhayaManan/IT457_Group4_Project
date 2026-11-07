@@ -38,6 +38,12 @@ variable "fixed_size" {
   }
 }
 
+variable "enable_cdn" {
+  description = "Put CloudFront in front of the ALB (E4)."
+  type        = bool
+  default     = false
+}
+
 variable "enable_loadgen" {
   description = "Create the k6 load generator instance. Off for the base deployment."
   type        = bool

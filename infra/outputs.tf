@@ -11,6 +11,10 @@ output "asg_name" {
   value = module.compute.asg_name
 }
 
+output "cdn_url" {
+  value = try("http://${module.cdn[0].domain_name}", null)
+}
+
 output "loadgen_instance_id" {
   value = try(module.loadgen[0].instance_id, null)
 }
