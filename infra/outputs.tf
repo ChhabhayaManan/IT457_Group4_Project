@@ -11,6 +11,10 @@ output "asg_name" {
   value = module.compute.asg_name
 }
 
+output "dashboard_url" {
+  value = "https://${var.aws_region}.console.aws.amazon.com/cloudwatch/home?region=${var.aws_region}#dashboards/dashboard/${module.observability.dashboard_name}"
+}
+
 output "cdn_url" {
   value = try("http://${module.cdn[0].domain_name}", null)
 }

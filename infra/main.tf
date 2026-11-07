@@ -33,6 +33,16 @@ module "compute" {
   }
 }
 
+module "observability" {
+  source = "./modules/observability"
+
+  name                    = var.project_name
+  aws_region              = var.aws_region
+  asg_name                = module.compute.asg_name
+  alb_arn_suffix          = module.alb.alb_arn_suffix
+  target_group_arn_suffix = module.alb.target_group_arn_suffix
+}
+
 module "cdn" {
   source = "./modules/cdn"
   count  = var.enable_cdn ? 1 : 0
