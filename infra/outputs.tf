@@ -10,3 +10,11 @@ output "alb_url" {
 output "asg_name" {
   value = module.compute.asg_name
 }
+
+output "loadgen_instance_id" {
+  value = try(module.loadgen[0].instance_id, null)
+}
+
+output "results_bucket" {
+  value = try(module.loadgen[0].results_bucket, null)
+}

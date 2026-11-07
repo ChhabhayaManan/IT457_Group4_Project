@@ -38,6 +38,18 @@ variable "fixed_size" {
   }
 }
 
+variable "enable_loadgen" {
+  description = "Create the k6 load generator instance. Off for the base deployment."
+  type        = bool
+  default     = false
+}
+
+variable "loadgen_instance_type" {
+  description = "k6 box type (Free plan allows c7i-flex.large, 2 vCPU). Check its CPU stays under 80% during runs."
+  type        = string
+  default     = "c7i-flex.large"
+}
+
 variable "play_iterations" {
   description = "PBKDF2 rounds per /play call: the CPU cost of one playback request."
   type        = number
