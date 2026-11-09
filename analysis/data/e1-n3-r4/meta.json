@@ -1,0 +1,1 @@
+{"experiment": "e1", "variant": "n3", "run": 4, "run_name": "e1-n3-r4", "script": "constant_rate.js", "start": 1794043560, "end": 1794044460, "k6_exit": 0}
