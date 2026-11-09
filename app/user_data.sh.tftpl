@@ -7,9 +7,10 @@ set -euxo pipefail
 exec > >(tee -a /var/log/hotstar-boot.log) 2>&1
 echo "BOOT_START $(date +%s)"
 
-# Bring the OS fully up to date first.
-dnf -y update
-dnf -y install python3.12 python3.12-pip
+# Boot time is the floor for reactive scaling, so do only what serving needs.
+# No full "dnf update" (it took most of the boot; the AMI from SSM is already
+# recent) and no optional extras.
+dnf -y install --setopt=install_weak_deps=False python3.12 python3.12-pip
 
 # App code, written by Terraform into this script.
 useradd --system --home /opt/app --shell /sbin/nologin hotstar || true
@@ -25,7 +26,7 @@ ${key}=${value}
 ENV
 
 python3.12 -m venv /opt/app/venv
-/opt/app/venv/bin/pip install -r /opt/app/requirements.txt
+/opt/app/venv/bin/pip install --no-cache-dir --disable-pip-version-check -r /opt/app/requirements.txt
 chown -R hotstar:hotstar /opt/app
 
 cat > /etc/systemd/system/hotstar.service <<'UNIT'
