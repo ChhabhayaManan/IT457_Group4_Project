@@ -31,6 +31,16 @@ variable "fixed_size" {
   type        = number
 }
 
+variable "scaling_mode" {
+  description = "fixed, step (CPU step scaling) or scheduled (step plus a pre-warm schedule)."
+  type        = string
+}
+
+variable "asg_max" {
+  description = "Upper limit when the group scales."
+  type        = number
+}
+
 variable "app_dir" {
   description = "Path to the app/ folder whose files go into user data."
   type        = string

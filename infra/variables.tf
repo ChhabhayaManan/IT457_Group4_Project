@@ -22,19 +22,41 @@ variable "budget_email" {
 }
 
 variable "instance_type" {
-  description = "App server type. Keep the same for every run so results compare. c7i-flex.large is allowed on the AWS Free plan."
+  description = "App server type. Keep the same for every run so results compare. c7i-flex.large (2 vCPU) is allowed on the AWS Free plan; 3 servers + k6 = 8 vCPU, our quota."
   type        = string
   default     = "c7i-flex.large"
 }
 
 variable "fixed_size" {
-  description = "Instance count when the group has a fixed size (E1: 1, 2, 4, 8)."
+  description = "Instance count when the group has a fixed size (E1: 1, 2, 3)."
   type        = number
   default     = 1
 
   validation {
     condition     = var.fixed_size >= 1 && var.fixed_size <= 10
     error_message = "fixed_size must be between 1 and 10."
+  }
+}
+
+variable "scaling_mode" {
+  description = "fixed (E1), step (E2: CPU step scaling) or scheduled (E3: step plus pre-warm)."
+  type        = string
+  default     = "fixed"
+
+  validation {
+    condition     = contains(["fixed", "step", "scheduled"], var.scaling_mode)
+    error_message = "scaling_mode must be fixed, step or scheduled."
+  }
+}
+
+variable "asg_max" {
+  description = "Most instances the group may scale to. 3 x 2 vCPU + the k6 box (2) = 8 vCPU, our quota; raise it only after a quota increase."
+  type        = number
+  default     = 3
+
+  validation {
+    condition     = var.asg_max >= 1 && var.asg_max <= 10
+    error_message = "asg_max must be between 1 and 10."
   }
 }
 

@@ -6,6 +6,8 @@ data "aws_ssm_parameter" "al2023_ami" {
 }
 
 locals {
+  fixed = var.scaling_mode == "fixed"
+
   # Every .py file in app/ plus requirements.txt is copied into user data,
   # so a new app file is picked up without changing this module.
   app_file_names = setunion(fileset(var.app_dir, "*.py"), ["requirements.txt"])
@@ -53,7 +55,7 @@ resource "aws_launch_template" "app" {
   }
 
   # Only burstable types (t3, t4g) take a credit setting. Unlimited means CPU
-  # credits never run out mid-test and skew latency. c7i has a fixed full-speed CPU.
+  # credits never run out mid-test and skew latency. c7i-flex is not burstable in that sense.
   dynamic "credit_specification" {
     for_each = startswith(var.instance_type, "t") ? [1] : []
     content {
@@ -89,9 +91,10 @@ resource "aws_autoscaling_group" "app" {
   vpc_zone_identifier = var.private_subnet_ids
   target_group_arns   = [var.target_group_arn]
 
-  min_size         = var.fixed_size
-  max_size         = var.fixed_size
-  desired_capacity = var.fixed_size
+  # fixed: exactly fixed_size servers. step/scheduled: 1 to asg_max, the policies decide.
+  min_size         = local.fixed ? var.fixed_size : 1
+  max_size         = local.fixed ? var.fixed_size : var.asg_max
+  desired_capacity = local.fixed ? var.fixed_size : 1
 
   health_check_type         = "ELB"
   health_check_grace_period = 120
@@ -123,5 +126,11 @@ resource "aws_autoscaling_group" "app" {
     key                 = "Name"
     value               = "${var.name}-app"
     propagate_at_launch = true
+  }
+
+  # Scaling policies move desired capacity; Terraform must not undo that.
+  # When min/max change, AWS pulls desired into the new range by itself.
+  lifecycle {
+    ignore_changes = [desired_capacity]
   }
 }
