@@ -1,0 +1,9 @@
+cpu-low actions paused
+run 1: {'request_to_launch_s': 11.3, 'launch_to_in_service_s': 6.0, 'in_service_to_healthy_s': 49.5, 'request_to_healthy_s': 66.9, 'instance_id': 'i-0e73241efdd6691fa'}
+waiting 120 s for the extra instance to drain...
+run 2: {'request_to_launch_s': 12.2, 'launch_to_in_service_s': 5.2, 'in_service_to_healthy_s': 52.3, 'request_to_healthy_s': 69.6, 'instance_id': 'i-0950d4ef5f0d8b73a'}
+waiting 120 s for the extra instance to drain...
+run 3: {'request_to_launch_s': 10.1, 'launch_to_in_service_s': 5.2, 'in_service_to_healthy_s': 50.3, 'request_to_healthy_s': 65.7, 'instance_id': 'i-0368b5e4c11c60c21'}
+cpu-low actions re-enabled
+
+[exited with code 0]

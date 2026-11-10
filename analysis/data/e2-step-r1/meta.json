@@ -1,0 +1,1 @@
+{"experiment": "e2", "variant": "step", "run": 1, "run_name": "e2-step-r1", "script": "spike.js", "start": 1794046483, "end": 1794048644, "k6_exit": 0}
