@@ -1,0 +1,1 @@
+{"experiment": "e3", "variant": "prewarm", "run": 1, "run_name": "e3-prewarm-r1", "script": "spike.js", "start": 1794073929, "end": 1794076090, "k6_exit": 0}
