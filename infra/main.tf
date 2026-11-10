@@ -25,6 +25,9 @@ module "compute" {
   fixed_size            = var.fixed_size
   scaling_mode          = var.scaling_mode
   asg_max               = var.asg_max
+  prewarm_start         = var.prewarm_start
+  prewarm_end           = var.prewarm_end
+  prewarm_size          = var.prewarm_size
   app_dir               = "${path.root}/../app"
   panic_param_arn       = aws_ssm_parameter.panic_mode.arn
 

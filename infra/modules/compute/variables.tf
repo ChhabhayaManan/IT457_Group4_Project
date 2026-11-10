@@ -41,6 +41,21 @@ variable "asg_max" {
   type        = number
 }
 
+variable "prewarm_start" {
+  description = "UTC time (RFC 3339) to raise the floor, used when scaling_mode is scheduled."
+  type        = string
+}
+
+variable "prewarm_end" {
+  description = "UTC time (RFC 3339) to drop the floor back to 1."
+  type        = string
+}
+
+variable "prewarm_size" {
+  description = "Instances to have running from prewarm_start."
+  type        = number
+}
+
 variable "app_dir" {
   description = "Path to the app/ folder whose files go into user data."
   type        = string

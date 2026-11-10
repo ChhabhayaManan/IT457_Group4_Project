@@ -60,6 +60,39 @@ variable "asg_max" {
   }
 }
 
+variable "prewarm_start" {
+  description = "E3: UTC time (RFC 3339, e.g. 2026-11-10T04:25:00Z) to pre-warm. Must be in the future at apply."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.scaling_mode != "scheduled" || can(formatdate("YYYY", var.prewarm_start))
+    error_message = "scaling_mode = \"scheduled\" needs prewarm_start as an RFC 3339 UTC time."
+  }
+}
+
+variable "prewarm_end" {
+  description = "E3: UTC time (RFC 3339) to drop the floor back to 1 after the spike."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.scaling_mode != "scheduled" || try(timecmp(var.prewarm_end, var.prewarm_start) > 0, false)
+    error_message = "prewarm_end must be an RFC 3339 UTC time after prewarm_start."
+  }
+}
+
+variable "prewarm_size" {
+  description = "E3: instances running from prewarm_start (2 of the 3 asg_max, leaving step scaling one to add)."
+  type        = number
+  default     = 2
+
+  validation {
+    condition     = var.prewarm_size >= 1 && var.prewarm_size <= var.asg_max
+    error_message = "prewarm_size must be between 1 and asg_max."
+  }
+}
+
 variable "enable_cdn" {
   description = "Put CloudFront in front of the ALB (E4)."
   type        = bool
