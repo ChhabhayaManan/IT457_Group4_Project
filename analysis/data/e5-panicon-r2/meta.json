@@ -1,0 +1,1 @@
+{"experiment": "e5", "variant": "panicon", "run": 2, "run_name": "e5-panicon-r2", "script": "overload.js", "start": 1794085773, "end": 1794086078, "k6_exit": 0}

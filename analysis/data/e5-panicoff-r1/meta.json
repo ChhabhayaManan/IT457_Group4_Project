@@ -1,0 +1,1 @@
+{"experiment": "e5", "variant": "panicoff", "run": 1, "run_name": "e5-panicoff-r1", "script": "overload.js", "start": 1794084607, "end": 1794084913, "k6_exit": 0}
