@@ -3,7 +3,7 @@
 # live with the scaling policy in the compute module.
 
 locals {
-  asg_dim = ["AutoScaling", "GroupInServiceInstances", "AutoScalingGroupName", var.asg_name]
+  asg_dim = ["AWS/AutoScaling", "GroupInServiceInstances", "AutoScalingGroupName", var.asg_name]
 
   widgets = [
     {
@@ -20,7 +20,7 @@ locals {
         view   = "timeSeries"
         metrics = [
           local.asg_dim,
-          ["AutoScaling", "GroupDesiredCapacity", "AutoScalingGroupName", var.asg_name],
+          ["AWS/AutoScaling", "GroupDesiredCapacity", "AutoScalingGroupName", var.asg_name],
         ]
       }
     },
