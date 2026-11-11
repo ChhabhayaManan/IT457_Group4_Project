@@ -1,0 +1,1 @@
+{"experiment": "e4", "variant": "direct", "run": 3, "run_name": "e4-direct-r3", "script": "constant_rate.js", "start": 1794083589, "end": 1794083890, "k6_exit": 0}

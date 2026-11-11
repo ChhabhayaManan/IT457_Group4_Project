@@ -1,0 +1,1 @@
+{"experiment": "e4", "variant": "cdn", "run": 2, "run_name": "e4-cdn-r2", "script": "constant_rate.js", "start": 1794083143, "end": 1794083444, "k6_exit": 0}

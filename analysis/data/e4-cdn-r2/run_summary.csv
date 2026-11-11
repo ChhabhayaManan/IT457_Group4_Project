@@ -1,0 +1,3 @@
+endpoint,requests,errors,error_rate,duration_s,rps,p50_ms,p95_ms,p99_ms
+ALL,240001,0,0.0,301,797.35,1.51,1.89,2.66
+score,240001,0,0.0,301,797.35,1.51,1.89,2.66
