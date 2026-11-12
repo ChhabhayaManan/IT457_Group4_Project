@@ -71,12 +71,34 @@ def _spike(out_dir: str, experiment: str, variant: str, prewarm: bool, rng: rand
     _meta(folder, experiment, variant, 1, START + duration)
 
 
+def _compare(out_dir: str, experiment: str, variants: dict[str, dict[str, tuple[float, float]]],
+             rng: random.Random) -> None:
+    """variants: {variant: {endpoint: (p95_ms, error_rate)}}, 3 runs each."""
+    for variant, endpoints in variants.items():
+        for run in (1, 2, 3):
+            folder = os.path.join(out_dir, f"{experiment}-{variant}-r{run}")
+            os.makedirs(folder, exist_ok=True)
+            rows = []
+            for endpoint, (p95, error_rate) in endpoints.items():
+                p95 *= rng.uniform(0.9, 1.1)
+                requests = 60000
+                rows.append([endpoint, requests, int(requests * error_rate), error_rate, 300, 200,
+                             round(p95 / 3, 2), round(p95, 2), round(p95 * 1.5, 2)])
+            _write_csv(os.path.join(folder, "run_summary.csv"), SUMMARY_FIELDS, rows)
+            _meta(folder, experiment, variant, run, START + 300)
+
+
 def make_dummy_data(out_dir: str, seed: int = 4) -> None:
     rng = random.Random(seed)
     os.makedirs(out_dir, exist_ok=True)
     _e1(out_dir, rng)
     _spike(out_dir, "e2", "step", prewarm=False, rng=rng)
     _spike(out_dir, "e3", "prewarm", prewarm=True, rng=rng)
+    _compare(out_dir, "e4", {"direct": {"score": (180.0, 0.0)}, "cdn": {"score": (25.0, 0.0)}}, rng)
+    _compare(out_dir, "e5", {
+        "panicoff": {"home": (2500.0, 0.08), "play": (2600.0, 0.07), "ALL": (2400.0, 0.06)},
+        "panicon": {"home": (60.0, 0.0), "play": (700.0, 0.01), "ALL": (400.0, 0.004)},
+    }, rng)
 
 
 def main() -> None:
