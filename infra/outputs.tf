@@ -30,3 +30,15 @@ output "results_bucket" {
 output "video_instance_id" {
   value = try(module.video[0].instance_id, null)
 }
+
+output "video_bucket" {
+  value = try(module.video[0].bucket, null)
+}
+
+output "video_stream_url" {
+  value = try(module.video[0].stream_url, null)
+}
+
+output "video_player_url" {
+  value = try(module.video[0].player_url, null)
+}

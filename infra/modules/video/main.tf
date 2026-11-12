@@ -7,7 +7,7 @@ data "aws_ssm_parameter" "al2023_ami" {
 
 locals {
   scripts = { for f in fileset(var.video_dir, "*.sh") : f => filebase64("${var.video_dir}/${f}") }
-  env     = {}
+  env     = { VIDEO_BUCKET = aws_s3_bucket.video.bucket }
 }
 
 resource "aws_security_group" "video" {
