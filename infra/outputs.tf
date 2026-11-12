@@ -26,3 +26,7 @@ output "loadgen_instance_id" {
 output "results_bucket" {
   value = try(module.loadgen[0].results_bucket, null)
 }
+
+output "video_instance_id" {
+  value = try(module.video[0].instance_id, null)
+}

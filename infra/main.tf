@@ -66,3 +66,13 @@ module "loadgen" {
   instance_type = var.loadgen_instance_type
   loadtest_dir  = "${path.root}/../loadtest"
 }
+
+module "video" {
+  source = "./modules/video"
+  count  = var.enable_video ? 1 : 0
+
+  name      = var.project_name
+  vpc_id    = module.network.vpc_id
+  subnet_id = module.network.private_subnet_ids[0]
+  video_dir = "${path.root}/../video"
+}

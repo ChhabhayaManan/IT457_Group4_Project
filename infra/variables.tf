@@ -111,6 +111,12 @@ variable "loadgen_instance_type" {
   default     = "c7i-flex.large"
 }
 
+variable "enable_video" {
+  description = "Optional video demo: FFmpeg ingest box making a live HLS stream."
+  type        = bool
+  default     = false
+}
+
 variable "play_iterations" {
   description = "PBKDF2 rounds per /play call: the CPU cost of one playback request."
   type        = number
