@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Group 4 Live Player</title>
+<style>
+  :root { --bg: #0d1117; --panel: #161b22; --text: #e6edf3; --muted: #8b949e; --accent: #2f81f7; --live: #f85149; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, sans-serif; }
+  main { max-width: 960px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 20px; margin: 8px 0 12px; display: flex; align-items: center; gap: 10px; }
+  .badge { background: var(--live); color: #fff; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+  video { width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 8px; }
+  form { display: flex; gap: 8px; margin: 12px 0; flex-wrap: wrap; }
+  input { flex: 1 1 300px; min-width: 0; padding: 8px; border-radius: 6px; border: 1px solid #30363d; background: var(--panel); color: var(--text); }
+  button, select { padding: 8px 14px; border-radius: 6px; border: 0; background: var(--accent); color: #fff; font-weight: 600; cursor: pointer; }
+  select { background: var(--panel); border: 1px solid #30363d; }
+  dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 0; }
+  dl div { background: var(--panel); padding: 10px 12px; border-radius: 8px; }
+  dt { color: var(--muted); font-size: 12px; }
+  dd { margin: 0; font-size: 18px; font-variant-numeric: tabular-nums; }
+  p.note { color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Group 4 mini-Hotstar <span class="badge">LIVE</span></h1>
+  <video id="video" controls muted playsinline></video>
+
+  <form id="form">
+    <input id="src" type="url" placeholder="https://dxxxx.cloudfront.net/live/master.m3u8" aria-label="Stream URL">
+    <select id="quality" aria-label="Quality"><option value="-1">Auto</option></select>
+    <button type="submit">Play</button>
+  </form>
+
+  <dl>
+    <div><dt>Quality now</dt><dd id="level">–</dd></div>
+    <div><dt>Bandwidth estimate</dt><dd id="bw">–</dd></div>
+    <div><dt>Buffer ahead</dt><dd id="buffer">–</dd></div>
+    <div><dt>Behind live edge</dt><dd id="latency">–</dd></div>
+  </dl>
+  <p class="note">The stream is an FFmpeg test pattern in two qualities (720p, 360p).
+    "Auto" lets hls.js switch quality with the network, like the Hotstar app. Throttle the
+    network in the browser dev tools to watch it drop to 360p.</p>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.6.15/dist/hls.min.js"></script>
+<script>
+  const video = document.getElementById("video");
+  const srcInput = document.getElementById("src");
+  const quality = document.getElementById("quality");
+  const show = (id, text) => { document.getElementById(id).textContent = text; };
+  let hls = null;
+
+  // ?src=<url> wins; served from the video bucket, the stream is next to this page.
+  const params = new URLSearchParams(location.search);
+  srcInput.value = params.get("src") || (location.protocol.startsWith("http") ? new URL("live/master.m3u8", location.href).href : "");
+
+  function play(url) {
+    if (hls) { hls.destroy(); hls = null; }
+    quality.length = 1;
+    if (window.Hls && Hls.isSupported()) {
+      hls = new Hls({ lowLatencyMode: false, liveSyncDurationCount: 3 });
+      hls.loadSource(url);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
+        data.levels.forEach((level, i) => quality.add(new Option(`${level.height}p`, i)));
+        video.play().catch(() => {});
+      });
+      hls.on(Hls.Events.LEVEL_SWITCHED, (_, data) => {
+        const level = hls.levels[data.level];
+        show("level", `${level.height}p · ${Math.round(level.bitrate / 1000)} kb/s`);
+      });
+      hls.on(Hls.Events.ERROR, (_, data) => { if (data.fatal) show("level", `error: ${data.details}`); });
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = url; // Safari plays HLS natively
+      video.play().catch(() => {});
+    } else {
+      show("level", "HLS not supported in this browser");
+    }
+  }
+
+  quality.addEventListener("change", () => { if (hls) hls.currentLevel = Number(quality.value); });
+  document.getElementById("form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (srcInput.value) play(srcInput.value);
+  });
+
+  setInterval(() => {
+    if (hls) {
+      show("bw", `${(hls.bandwidthEstimate / 1e6).toFixed(1)} Mb/s`);
+      if (hls.latency) show("latency", `${hls.latency.toFixed(1)} s`);
+    }
+    const ranges = video.buffered;
+    if (ranges.length) show("buffer", `${(ranges.end(ranges.length - 1) - video.currentTime).toFixed(1)} s`);
+  }, 1000);
+
+  if (srcInput.value) play(srcInput.value);
+</script>
+</body>
+</html>
