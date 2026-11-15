@@ -31,9 +31,9 @@ traffic spikes and removes them when it drops. k6 load tests measure how it beha
 
 | ID | Question | Setup |
 | --- | --- | --- |
-| E1 | How does latency change with 1, 2, 4, 8 servers at the same load? | fixed group, `constant_rate.js` |
-| E2 | How fast does CPU step scaling react to a spike? | 1–10 servers, `spike.js` |
-| E3 | Does pre-warming before a known spike remove the gap? | E2 + scheduled floor of 6 |
+| E1 | How does latency change with 1, 2, 3 servers at the same load? | fixed group, `constant_rate.js` |
+| E2 | How fast does CPU step scaling react to a spike? | 1–3 servers, `spike.js` |
+| E3 | Does pre-warming before a known spike remove the gap? | E2 + scheduled floor of 2 |
 | E4 | What does a CDN do for cacheable responses (`/score`)? | CloudFront 5 s cache vs direct |
 | E5 | Does panic mode keep `/play` alive under overload? | SSM flag off vs on, `overload.js` |
 
@@ -57,12 +57,12 @@ Each folder has its own README: [`infra/`](infra/README.md), [`app/`](app/README
 
 ```bash
 # one-time setup: state bucket, backend, budget email, vCPU quota -> infra/README.md
-terraform -chdir=infra apply -var-file=experiments/e1-fixed-4.tfvars
+terraform -chdir=infra apply -var-file=experiments/e1-fixed-3.tfvars
 python infra/scripts/smoke_test.py "$(terraform -chdir=infra output -raw alb_url)"
-python loadtest/start_run.py e1 n4 1 constant_rate.js -e RATE=50 -e DURATION=10m
-python analysis/pull_cloudwatch.py analysis/data/e1-n4-r1
+python loadtest/start_run.py e1 n3 1 constant_rate.js -e RATE=250 -e DURATION=15m
+python analysis/pull_cloudwatch.py analysis/data/e1-n3-r1
 python analysis/summarize.py && python analysis/make_figures.py
-terraform -chdir=infra destroy -var-file=experiments/e1-fixed-4.tfvars
+terraform -chdir=infra destroy -var-file=experiments/e1-fixed-3.tfvars
 ```
 
 ## Before the experiments: vCPU quota
